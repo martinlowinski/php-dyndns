@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<request>
+  <auth>
+    <user></user>
+    <password></password>
+    <context></context>
+  </auth>
+  <language>de</language>
+  <task>
+    <code>0205</code>
+    <zone>
+      <name></name>
+      <system_ns>nsa3.schlundtech.de</system_ns>
+    </zone>
+  </task>
+</request>
