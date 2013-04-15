@@ -1,3 +1,5 @@
+<?php
+
 define('HOST', 'https://gateway.schlundtech.de');
 define('USER', '');
 define('PASSWORD', '');
@@ -7,3 +9,4 @@ define('XML_PUT_ZONE', 'request-put.xml');
 define('DOMAIN', 'example.com');
 define('REMOTE_PASS', 'mylongdyndnspassword');
 
+?>
