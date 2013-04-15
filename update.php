@@ -2,6 +2,7 @@
 
 // Disable error reporting for production
 error_reporting(0);
+header('Content-type: application/json')
 
 // Config
 include_once("config.php");
@@ -21,15 +22,15 @@ if ($_GET) {
 
 // Validation
 if (!validCred($pass)) {
-  return;
+  return "{ status: \"failed\" }";
 }
 
 if (!validIP($ipaddr)) {
-  return;
+  return "{ status: \"failed\" }";
 }
 
 if (!validDomain($domain)) {
-  return;
+  return "{ status: \"failed\" }";
 }
 
 // Extract subdomain
@@ -45,7 +46,6 @@ $doc_get->getElementsByTagName('context')->item(0)->nodeValue = CONTEXT;
 $doc_get->getElementsByTagName('name')->item(0)->nodeValue = DOMAIN;
 
 // Send
-header('Content-Type: text/xml');
 $result = requestCurl($doc_get->saveXML());
 
 // Response
@@ -60,7 +60,7 @@ $entries = $xpath->query($query);
 if ($entries->length > 0) {
   $status = $entries->item(0)->nodeValue;
   if ($status == "error") {
-    return;
+    return "{ status: \"failed\" }";
   }
 }
 
@@ -87,7 +87,8 @@ $xpath = new DOMXPath($doc_put);
 $query = "//task/zone/rr[name='" . $subdomain . "']/value";
 $entries = $xpath->query($query);
 if ($entries->length != 1) {
-  return;
+  return "{ status: \"failed\" }";
+
 }
 $entries->item(0)->nodeValue = $ipaddr;
 
@@ -100,6 +101,8 @@ $result = requestCurl($xml_put);
 /*$doc_result = DOMDocument::loadXML($result);
 $doc_result->formatOutput = true;
 echo $doc_result->saveXML();*/
+
+return "{ status: \"success\" }";
 
 function requestCurl($data) {
   $ch = curl_init(HOST);
