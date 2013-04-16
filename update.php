@@ -2,7 +2,6 @@
 
 // Disable error reporting for production
 error_reporting(0);
-header('Content-type: application/json')
 
 // Config
 include_once("config.php");
@@ -22,15 +21,15 @@ if ($_GET) {
 
 // Validation
 if (!validCred($pass)) {
-  return "{ status: \"failed\" }";
+  respond("failed", "bad credentials");
 }
 
 if (!validIP($ipaddr)) {
-  return "{ status: \"failed\" }";
+  respond("failed", "not a valid ip address");
 }
 
 if (!validDomain($domain)) {
-  return "{ status: \"failed\" }";
+  respond("failed", "not a valid domain");
 }
 
 // Extract subdomain
@@ -60,7 +59,7 @@ $entries = $xpath->query($query);
 if ($entries->length > 0) {
   $status = $entries->item(0)->nodeValue;
   if ($status == "error") {
-    return "{ status: \"failed\" }";
+    respond("failed", "cannot get current zone records");
   }
 }
 
@@ -87,7 +86,7 @@ $xpath = new DOMXPath($doc_put);
 $query = "//task/zone/rr[name='" . $subdomain . "']/value";
 $entries = $xpath->query($query);
 if ($entries->length != 1) {
-  return "{ status: \"failed\" }";
+  respond("failed", "domain has no dyndns subdomain");
 
 }
 $entries->item(0)->nodeValue = $ipaddr;
@@ -102,7 +101,7 @@ $result = requestCurl($xml_put);
 $doc_result->formatOutput = true;
 echo $doc_result->saveXML();*/
 
-return "{ status: \"success\" }";
+respond("success");
 
 function requestCurl($data) {
   $ch = curl_init(HOST);
@@ -110,8 +109,9 @@ function requestCurl($data) {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
   
-  if (!$data = curl_exec( $ch )) {
-    echo 'Curl execution error.', curl_error($ch) ."\n"; return FALSE;
+  if (!$data = curl_exec($ch)) {
+    echo 'Curl execution error.', curl_error($ch) ."\n";
+    return FALSE;
   }
 
   curl_close($ch);
@@ -137,6 +137,17 @@ function validCred($pass) {
     return true;
   }
   return false;
+}
+
+function respond($status, $msg = "") {
+  header('Content-type: application/json');
+  $response = array();
+  $response["status"] = $status;
+  if (!empty($msg)) {
+    $response["msg"] = $msg;
+  }
+  echo json_encode($response);
+  return;
 }
 
 ?>
