@@ -17,11 +17,10 @@ Installation
 2. Upload the files to your webserver. The `update.php` script has to be accessible from the web, for example: `dyndns.example.com/update.php`. *HTTPS is highly recommended!*
 3. Copy `config.example.php` to `config.php` and adjust the settings.
 4. Create the logdir and give the webserver write-access to it.
-5. Set up a cron-job, fritz-box, router, ... to do a request every time the ip-address changes. The URL is `http://dyndns.example.com/update.php?pass=<password>&domain=home.example.com&ipaddr=<ipaddr>`
+5. Set up a cron-job, fritz-box, router, ... to do a request every time the ip-address changes. The URL is `http://dyndns.example.com/update.php?pass=<password>&domain=home.example.com&ipaddr=<ipaddr>&ip6addr=<ip6addr>`
 
 
 Roadmap
 -------
 
 - Support multiple dynamic subdomains
-- Support IPv6

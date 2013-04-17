@@ -10,17 +10,10 @@ set_error_handler("dyndns_error_handler");
 include_once("config.php");
 
 // Opts
-if ($_GET) {
-  $pass = $_GET['pass'];
-  $domain = $_GET['domain'];
-  $ipaddr = $_GET['ipaddr'];
-} else {
-  $shortopts = "p:d:i:";
-  $opts = getopt($shortopts);
-  $pass = isset($opts["p"]) ? $opts["p"] : null;
-  $domain = isset($opts["d"]) ? $opts["d"] : null;
-  $ipaddr = isset($opts["i"]) ? $opts["i"] : null;
-}
+$pass = $_GET['pass'];
+$domain = $_GET['domain'];
+$ipaddr = $_GET['ipaddr'];
+$ip6addr = $_GET['ip6addr'];
 
 // Validation
 if (!validCred($pass)) {
@@ -28,9 +21,19 @@ if (!validCred($pass)) {
   respond("failed", "bad credentials");
 }
 
-if (!validIP($ipaddr)) {
+if (!isset($ipaddr) && !isset($ip6addr)) {
+  trigger_error("no ip(v6) address given", E_USER_WARNING);
+  respond("failed", "no ip(v6) address given");
+}
+
+if (isset($ipaddr) && !validIP($ipaddr)) {
   trigger_error("not a valid ip address", E_USER_WARNING);
   respond("failed", "not a valid ip address");
+}
+
+if (isset($ip6addr) && !validIPv6($ip6addr)) {
+  trigger_error("not a valid ipv6 address", E_USER_WARNING);
+  respond("failed", "not a valid ipv6 address");
 }
 
 if (!validDomain($domain)) {
@@ -89,15 +92,30 @@ $frag = $doc_put->importNode($frag_data, TRUE);
 $doc_put->getElementsByTagName('task')->item(0)->appendChild($frag);
 
 // Update: New IP
-$xpath = new DOMXPath($doc_put);
-$query = "//task/zone/rr[name='" . SUBDOMAIN . "']/value";
-$entries = $xpath->query($query);
-if ($entries->length != 1) {
-  trigger_error("domain has no dyndns subdomain", E_USER_ERROR);
-  respond("failed", "domain has no dyndns subdomain");
+if (isset($ipaddr)) {
+  $xpath = new DOMXPath($doc_put);
+  $query = "//task/zone/rr[name='" . SUBDOMAIN . "' and type='A']/value";
+  $entries = $xpath->query($query);
+  if ($entries->length != 1) {
+    trigger_error("domain has no dyndns A-record for " . SUBDOMAIN, E_USER_ERROR);
+    respond("failed", "domain has no dyndns A-record for " . SUBDOMAIN);
 
+  }
+  $entries->item(0)->nodeValue = $ipaddr;
 }
-$entries->item(0)->nodeValue = $ipaddr;
+
+// Update: New IPv6
+if (isset($ip6addr)) {
+  $xpath = new DOMXPath($doc_put);
+  $query = "//task/zone/rr[name='" . SUBDOMAIN . "' and type='AAAA']/value";
+  $entries = $xpath->query($query);
+  if ($entries->length != 1) {
+    trigger_error("domain has no dyndns AAAA-record for " . SUBDOMAIN, E_USER_ERROR);
+    respond("failed", "domain has no dyndns AAAA-record for " . SUBDOMAIN);
+
+  }
+  $entries->item(0)->nodeValue = $ip6addr;
+}
 
 // Update: Put
 $xml_put = $doc_put->saveXML();
@@ -130,6 +148,13 @@ function requestCurl($data) {
 
 function validIP($ip) {
   if (filter_var($ip, FILTER_VALIDATE_IP)) {
+    return true;
+  }
+  return false;
+}
+
+function validIPv6($ip) {
+  if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
     return true;
   }
   return false;
