@@ -1,7 +1,10 @@
 <?php
 
-// Disable error reporting for production
-error_reporting(0);
+//error_reporting(E_ALL);       /* for development */
+@ini_set("display_errors", 0);  /* don't show errors onscreen */
+
+// Custom error handler that writes to a file
+set_error_handler("dyndns_error_handler");
 
 // Config
 include_once("config.php");
@@ -21,14 +24,17 @@ if ($_GET) {
 
 // Validation
 if (!validCred($pass)) {
+  trigger_error("bad credentials", E_USER_WARNING);
   respond("failed", "bad credentials");
 }
 
 if (!validIP($ipaddr)) {
+  trigger_error("not a valid ip address", E_USER_WARNING);
   respond("failed", "not a valid ip address");
 }
 
 if (!validDomain($domain)) {
+  trigger_error("not a valid domain", E_USER_WARNING);
   respond("failed", "not a valid domain");
 }
 
@@ -43,14 +49,17 @@ $doc_get->getElementsByTagName('user')->item(0)->nodeValue = USER;
 $doc_get->getElementsByTagName('password')->item(0)->nodeValue = PASSWORD;
 $doc_get->getElementsByTagName('context')->item(0)->nodeValue = CONTEXT;
 $doc_get->getElementsByTagName('name')->item(0)->nodeValue = DOMAIN;
+// ATTENTION: This dom document contains credentials
+//trigger_error($doc_get->saveXML(), E_USER_NOTICE);
 
 // Send
+trigger_error("get current zone records", E_USER_NOTICE);
 $result = requestCurl($doc_get->saveXML());
 
 // Response
 $doc_result = DOMDocument::loadXML($result);
 $doc_result->formatOutput = true;
-//echo $doc_result->saveXML();
+trigger_error($doc_result->saveXML(), E_USER_NOTICE);
 
 // Abort if we cannot get the current zone records
 $xpath = new DOMXPath($doc_result);
@@ -59,6 +68,7 @@ $entries = $xpath->query($query);
 if ($entries->length > 0) {
   $status = $entries->item(0)->nodeValue;
   if ($status == "error") {
+    trigger_error("cannot get current zone records", E_USER_ERROR);
     respond("failed", "cannot get current zone records");
   }
 }
@@ -86,6 +96,7 @@ $xpath = new DOMXPath($doc_put);
 $query = "//task/zone/rr[name='" . $subdomain . "']/value";
 $entries = $xpath->query($query);
 if ($entries->length != 1) {
+  trigger_error("domain has no dyndns subdomain", E_USER_ERROR);
   respond("failed", "domain has no dyndns subdomain");
 
 }
@@ -93,13 +104,15 @@ $entries->item(0)->nodeValue = $ipaddr;
 
 // Update: Put
 $xml_put = $doc_put->saveXML();
-//echo $xml_put;
+// ATTENTION: This dom document contains credentials
+//trigger_error($xml_put, E_USER_NOTICE);
+trigger_error("set new zone records", E_USER_NOTICE);
 $result = requestCurl($xml_put);
 
 // Response
-/*$doc_result = DOMDocument::loadXML($result);
+$doc_result = DOMDocument::loadXML($result);
 $doc_result->formatOutput = true;
-echo $doc_result->saveXML();*/
+trigger_error($doc_result->saveXML(), E_USER_NOTICE);
 
 respond("success");
 
@@ -110,8 +123,8 @@ function requestCurl($data) {
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
   
   if (!$data = curl_exec($ch)) {
-    echo 'Curl execution error.', curl_error($ch) ."\n";
-    return FALSE;
+    trigger_error('Curl execution error.', curl_error($ch), E_USER_ERROR);
+    return false;
   }
 
   curl_close($ch);
@@ -147,7 +160,40 @@ function respond($status, $msg = "") {
     $response["msg"] = $msg;
   }
   echo json_encode($response);
-  return;
+  exit();
+}
+
+function dyndns_error_handler($errno, $errstr, $errfile, $errline)
+{
+    if (!(error_reporting() & $errno)) {
+        // This error code is not included in error_reporting
+        return;
+    }
+
+    $date = date(DATE_W3C);
+
+    switch ($errno) {
+    case E_USER_ERROR:
+        $str .= "$date ERROR [$errno]: $errstr, Fatal error on line $errline in file $errfile";
+        break;
+
+    case E_USER_WARNING:
+        $str .= "$date WARNING [$errno]: $errstr\n";
+        break;
+
+    case E_USER_NOTICE:
+        $str .= "$date NOTICE [$errno]: $errstr\n";
+        break;
+
+    default:
+        $str .= "$date Unknown error type: [$errno] $errstr\n";
+        break;
+    }
+
+    file_put_contents(LOG, $str, FILE_APPEND);
+
+    /* Don't execute PHP internal error handler */
+    return true;
 }
 
 ?>

@@ -1,5 +1,6 @@
 <?php
 
+define('LOG', 'logs/dyndns.log');
 define('HOST', 'https://gateway.schlundtech.de');
 define('USER', '');
 define('PASSWORD', '');
