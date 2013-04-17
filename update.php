@@ -38,9 +38,6 @@ if (!validDomain($domain)) {
   respond("failed", "not a valid domain");
 }
 
-// Extract subdomain
-$subdomain = array_shift(explode(".", $domain));
-
 // Request
 $xml_get = implode("", file(XML_GET_ZONE));
 $doc_get = DOMDocument::loadXML($xml_get);
@@ -93,7 +90,7 @@ $doc_put->getElementsByTagName('task')->item(0)->appendChild($frag);
 
 // Update: New IP
 $xpath = new DOMXPath($doc_put);
-$query = "//task/zone/rr[name='" . $subdomain . "']/value";
+$query = "//task/zone/rr[name='" . SUBDOMAIN . "']/value";
 $entries = $xpath->query($query);
 if ($entries->length != 1) {
   trigger_error("domain has no dyndns subdomain", E_USER_ERROR);
