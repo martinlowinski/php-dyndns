@@ -135,6 +135,18 @@ $doc_result = DOMDocument::loadXML($result);
 $doc_result->formatOutput = true;
 trigger_error($doc_result->saveXML(), E_USER_NOTICE);
 
+/* Abort if setting the new zone records failed */
+$xpath = new DOMXPath($doc_result);
+$query = "status/type";
+$entries = $xpath->query($query);
+if ($entries->length > 0) {
+  $status = $entries->item(0)->nodeValue;
+  if ($status != "success") {
+    trigger_error("cannot set new zone records", E_USER_ERROR);
+    respond("failed", "cannot set new zone records");
+  }
+}
+
 respond("success");
 
 /* Wrapper for curl */
