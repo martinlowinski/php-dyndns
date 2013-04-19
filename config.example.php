@@ -9,6 +9,7 @@ define('XML_GET_ZONE', 'request-get.xml');
 define('XML_PUT_ZONE', 'request-put.xml');
 define('DOMAIN', 'example.com');
 define('SUBDOMAIN', 'home.example.com');
+define('SYSTEM_NS', 'ns.example.com');
 define('REMOTE_PASS', 'mylongdyndnspassword');
 
 ?>

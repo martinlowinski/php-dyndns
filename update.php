@@ -52,6 +52,7 @@ $doc_get->getElementsByTagName('user')->item(0)->nodeValue = USER;
 $doc_get->getElementsByTagName('password')->item(0)->nodeValue = PASSWORD;
 $doc_get->getElementsByTagName('context')->item(0)->nodeValue = CONTEXT;
 $doc_get->getElementsByTagName('name')->item(0)->nodeValue = DOMAIN;
+$doc_get->getElementsByTagName('system_ns')->item(0)->nodeValue = SYSTEM_NS;
 // ATTENTION: This dom document contains credentials
 //trigger_error($doc_get->saveXML(), E_USER_NOTICE);
 
