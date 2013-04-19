@@ -10,10 +10,10 @@ set_error_handler("dyndns_error_handler");
 include_once("config.php");
 
 /* Opts */
-$pass = $_GET['pass'];
-$domain = $_GET['domain'];
-$ipaddr = $_GET['ipaddr'];
-$ip6addr = $_GET['ip6addr'];
+$pass = isset($_GET['pass']) ? $_GET['pass'] : null;
+$domain = isset($_GET['domain']) ? $_GET['domain'] : null;
+$ipaddr = isset($_GET['ipaddr']) ? $_GET['ipaddr'] : null;
+$ip6addr = isset($_GET['ip6addr']) ? $_GET['ip6addr'] : null;
 
 /* Validation */
 if (!validCred($pass)) {
