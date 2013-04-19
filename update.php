@@ -6,16 +6,16 @@
 // Custom error handler that writes to a file
 set_error_handler("dyndns_error_handler");
 
-// Config
+/* Config */
 include_once("config.php");
 
-// Opts
+/* Opts */
 $pass = $_GET['pass'];
 $domain = $_GET['domain'];
 $ipaddr = $_GET['ipaddr'];
 $ip6addr = $_GET['ip6addr'];
 
-// Validation
+/* Validation */
 if (!validCred($pass)) {
   trigger_error("bad credentials", E_USER_WARNING);
   respond("failed", "bad credentials");
@@ -41,7 +41,10 @@ if (!validDomain($domain)) {
   respond("failed", "not a valid domain");
 }
 
-// Request
+/*
+ * Request: Get all records of the domain
+ */
+/* Build request */
 $xml_get = implode("", file(XML_GET_ZONE));
 $doc_get = DOMDocument::loadXML($xml_get);
 $doc_get->formatOutput = true;
@@ -52,16 +55,16 @@ $doc_get->getElementsByTagName('name')->item(0)->nodeValue = DOMAIN;
 // ATTENTION: This dom document contains credentials
 //trigger_error($doc_get->saveXML(), E_USER_NOTICE);
 
-// Send
+/* Send */
 trigger_error("get current zone records", E_USER_NOTICE);
 $result = requestCurl($doc_get->saveXML());
 
-// Response
+/* Receive */
 $doc_result = DOMDocument::loadXML($result);
 $doc_result->formatOutput = true;
 trigger_error($doc_result->saveXML(), E_USER_NOTICE);
 
-// Abort if we cannot get the current zone records
+/* Abort if we cannot get the current zone records */
 $xpath = new DOMXPath($doc_result);
 $query = "status/status";
 $entries = $xpath->query($query);
@@ -73,7 +76,10 @@ if ($entries->length > 0) {
   }
 }
 
-// Update: Settings
+/*
+ * Request: Set modified zone records
+ */
+/* Settings */
 $file_put = implode("", file(XML_PUT_ZONE));
 $doc_put = DOMDocument::loadXML($file_put);
 $doc_put->formatOutput = true;
@@ -81,7 +87,7 @@ $doc_put->getElementsByTagName('user')->item(0)->nodeValue = USER;
 $doc_put->getElementsByTagName('password')->item(0)->nodeValue = PASSWORD;
 $doc_put->getElementsByTagName('context')->item(0)->nodeValue = CONTEXT;
 
-// Update: Zone
+/* Zone */
 $frag_data = $doc_result->getElementsByTagName('zone')->item(0);
 $frag_data->removeChild($frag_data->getElementsByTagName('created')->item(0));
 $frag_data->removeChild($frag_data->getElementsByTagName('changed')->item(0));
@@ -91,7 +97,7 @@ $frag_data->removeChild($frag_data->getElementsByTagName('updated_by')->item(0))
 $frag = $doc_put->importNode($frag_data, TRUE);
 $doc_put->getElementsByTagName('task')->item(0)->appendChild($frag);
 
-// Update: New IP
+/* New dynamic DNS IP */
 if (isset($ipaddr)) {
   $xpath = new DOMXPath($doc_put);
   $query = "//task/zone/rr[name='" . SUBDOMAIN . "' and type='A']/value";
@@ -104,7 +110,7 @@ if (isset($ipaddr)) {
   $entries->item(0)->nodeValue = $ipaddr;
 }
 
-// Update: New IPv6
+/* New dynamic DNS IPv6 */
 if (isset($ip6addr)) {
   $xpath = new DOMXPath($doc_put);
   $query = "//task/zone/rr[name='" . SUBDOMAIN . "' and type='AAAA']/value";
@@ -117,20 +123,21 @@ if (isset($ip6addr)) {
   $entries->item(0)->nodeValue = $ip6addr;
 }
 
-// Update: Put
+/* Send */
 $xml_put = $doc_put->saveXML();
 // ATTENTION: This dom document contains credentials
 //trigger_error($xml_put, E_USER_NOTICE);
 trigger_error("set new zone records", E_USER_NOTICE);
 $result = requestCurl($xml_put);
 
-// Response
+/* Receive */
 $doc_result = DOMDocument::loadXML($result);
 $doc_result->formatOutput = true;
 trigger_error($doc_result->saveXML(), E_USER_NOTICE);
 
 respond("success");
 
+/* Wrapper for curl */
 function requestCurl($data) {
   $ch = curl_init(HOST);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -174,6 +181,7 @@ function validCred($pass) {
   return false;
 }
 
+/* Respond with status & message in JSON */
 function respond($status, $msg = "") {
   header('Content-type: application/json');
   $response = array();
@@ -185,37 +193,38 @@ function respond($status, $msg = "") {
   exit();
 }
 
+/* Custom error handler to log to file */
 function dyndns_error_handler($errno, $errstr, $errfile, $errline)
 {
-    if (!(error_reporting() & $errno)) {
-        // This error code is not included in error_reporting
-        return;
-    }
+  if (!(error_reporting() & $errno)) {
+    // This error code is not included in error_reporting
+    return;
+  }
 
-    $date = date(DATE_W3C);
+  $date = date(DATE_W3C);
 
-    switch ($errno) {
-    case E_USER_ERROR:
-        $str .= "$date ERROR [$errno]: $errstr, Fatal error on line $errline in file $errfile";
-        break;
+  switch ($errno) {
+  case E_USER_ERROR:
+    $str .= "$date ERROR [$errno]: $errstr, Fatal error on line $errline in file $errfile";
+    break;
 
-    case E_USER_WARNING:
-        $str .= "$date WARNING [$errno]: $errstr\n";
-        break;
+  case E_USER_WARNING:
+    $str .= "$date WARNING [$errno]: $errstr\n";
+    break;
 
-    case E_USER_NOTICE:
-        $str .= "$date NOTICE [$errno]: $errstr\n";
-        break;
+  case E_USER_NOTICE:
+    $str .= "$date NOTICE [$errno]: $errstr\n";
+    break;
 
-    default:
-        $str .= "$date Unknown error type: [$errno] $errstr\n";
-        break;
-    }
+  default:
+    $str .= "$date Unknown error type: [$errno] $errstr\n";
+    break;
+  }
 
-    file_put_contents(LOG, $str, FILE_APPEND);
+  file_put_contents(LOG, $str, FILE_APPEND);
 
-    /* Don't execute PHP internal error handler */
-    return true;
+  /* Don't execute PHP internal error handler */
+  return true;
 }
 
 ?>
