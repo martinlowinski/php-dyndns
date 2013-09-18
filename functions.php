@@ -65,6 +65,7 @@ function dyndns_error_handler($errno, $errstr, $errfile, $errline)
   }
 
   $date = date(DATE_W3C);
+  $str = "";
 
   switch ($errno) {
   case E_USER_ERROR:
