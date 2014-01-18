@@ -37,8 +37,6 @@ server {
   location ~ ^/logs/  { deny all; }
 }
 ```
-You could also make only `update.php` publicly available (via `ln -s ../php-dyndns/update.php htdocs/update.php`). But don't forget to update the paths accordingly.
-
 
 Roadmap
 -------
