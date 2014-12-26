@@ -37,6 +37,16 @@ function validDomain($domain)
     && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain)); //length of each label
 }
 
+function configuredDomain($domain)
+{
+  if (defined('DOMAINS')) {
+    $domains = unserialize(DOMAINS);
+    return array_key_exists($domain, $domains);
+  } else {
+    return $domain == DOMAIN;
+  }
+}
+
 function validCred($pass) {
   if ($pass == REMOTE_PASS) {
     return true;

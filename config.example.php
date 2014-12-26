@@ -15,7 +15,7 @@ define('XML_PUT_ZONE', 'request-put.xml');
 
 // Domain configuration
 // Multi-domain
-define('DOMAINS', array("example.com" => "home", "example.org" => "base"));
+define('DOMAINS', serialize(array("example.com" => "home", "example.org" => "base")));
 // Single domain
 //define('DOMAIN', 'example.com');
 //define('SUBDOMAIN', 'home');
