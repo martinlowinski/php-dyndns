@@ -14,8 +14,11 @@ define('XML_GET_ZONE', 'request-get.xml');
 define('XML_PUT_ZONE', 'request-put.xml');
 
 // Domain configuration
-define('DOMAIN', 'example.com');
-define('SUBDOMAIN', 'home');
+// Multi-domain
+define('DOMAINS', array("example.com" => "home", "example.org" => "base"));
+// Single domain
+//define('DOMAIN', 'example.com');
+//define('SUBDOMAIN', 'home');
 define('SYSTEM_NS', 'ns.example.com');
 
 // Credentials to access this service
