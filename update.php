@@ -47,7 +47,8 @@ if (!validDomain($domain)) {
  */
 /* Build request */
 $xml_get = implode("", file(XML_GET_ZONE));
-$doc_get = DOMDocument::loadXML($xml_get);
+$doc_get = new DOMDocument();
+$doc_get->loadXML($xml_get);
 $doc_get->formatOutput = true;
 $doc_get->getElementsByTagName('user')->item(0)->nodeValue = USER;
 $doc_get->getElementsByTagName('password')->item(0)->nodeValue = PASSWORD;
@@ -62,7 +63,8 @@ trigger_error("get current zone records", E_USER_NOTICE);
 $result = requestCurl($doc_get->saveXML());
 
 /* Receive */
-$doc_result = DOMDocument::loadXML($result);
+$doc_result = new DOMDocument();
+$doc_result->loadXML($result);
 $doc_result->formatOutput = true;
 trigger_error($doc_result->saveXML(), E_USER_NOTICE);
 
@@ -83,7 +85,8 @@ if ($entries->length > 0) {
  */
 /* Settings */
 $file_put = implode("", file(XML_PUT_ZONE));
-$doc_put = DOMDocument::loadXML($file_put);
+$doc_put = new DOMDocument();
+$doc_put->loadXML($file_put);
 $doc_put->formatOutput = true;
 $doc_put->getElementsByTagName('user')->item(0)->nodeValue = USER;
 $doc_put->getElementsByTagName('password')->item(0)->nodeValue = PASSWORD;
@@ -133,7 +136,8 @@ trigger_error("set new zone records", E_USER_NOTICE);
 $result = requestCurl($xml_put);
 
 /* Receive */
-$doc_result = DOMDocument::loadXML($result);
+$doc_result = new DOMDocument();
+$doc_result->loadXML($result);
 $doc_result->formatOutput = true;
 trigger_error($doc_result->saveXML(), E_USER_NOTICE);
 
