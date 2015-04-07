@@ -14,11 +14,12 @@ define('XML_GET_ZONE', 'request-get.xml');
 define('XML_PUT_ZONE', 'request-put.xml');
 
 // Domain configuration
-// Multi-domain
-define('DOMAINS', serialize(array("example.com" => "home", "example.org" => "base")));
-// Single domain
-//define('DOMAIN', 'example.com');
-//define('SUBDOMAIN', 'home');
+// Single domain (default), e.g. home.example.com
+define('DOMAIN', 'example.com');
+define('SUBDOMAIN', 'home');
+// Multi-domain, e.g. home.example.com and base.example.org
+//define('DOMAINS', serialize(array("example.com" => "home", "example.org" => "base")));
+// Nameserver (for single- or multi-domain)
 define('SYSTEM_NS', 'ns.example.com');
 
 // Credentials to access this service
