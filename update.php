@@ -42,6 +42,19 @@ if (!validDomain($domain)) {
   respond("failed", "not a valid domain");
 }
 
+if (!configuredDomain($domain)) {
+  trigger_error("unsupported domain", E_USER_WARNING);
+  respond("failed", "unsupported domain");
+}
+
+// Multi-domain
+if (defined('DOMAINS')) {
+  $domains = unserialize(DOMAINS);
+  $subdomain = $domains[$domain];
+} else {
+  $subdomain = SUBDOMAIN;
+}
+
 /*
  * Request: Get all records of the domain
  */
@@ -53,7 +66,7 @@ $doc_get->formatOutput = true;
 $doc_get->getElementsByTagName('user')->item(0)->nodeValue = USER;
 $doc_get->getElementsByTagName('password')->item(0)->nodeValue = PASSWORD;
 $doc_get->getElementsByTagName('context')->item(0)->nodeValue = CONTEXT;
-$doc_get->getElementsByTagName('name')->item(0)->nodeValue = DOMAIN;
+$doc_get->getElementsByTagName('name')->item(0)->nodeValue = $domain;
 $doc_get->getElementsByTagName('system_ns')->item(0)->nodeValue = SYSTEM_NS;
 // ATTENTION: This dom document contains credentials
 //trigger_error($doc_get->saveXML(), E_USER_NOTICE);
@@ -105,11 +118,11 @@ $doc_put->getElementsByTagName('task')->item(0)->appendChild($frag);
 /* New dynamic DNS IP */
 if (isset($ipaddr)) {
   $xpath = new DOMXPath($doc_put);
-  $query = "//task/zone/rr[name='" . SUBDOMAIN . "' and type='A']/value";
+  $query = "//task/zone/rr[name='" . $subdomain . "' and type='A']/value";
   $entries = $xpath->query($query);
   if ($entries->length != 1) {
-    trigger_error("domain has no dyndns A-record for " . SUBDOMAIN, E_USER_ERROR);
-    respond("failed", "domain has no dyndns A-record for " . SUBDOMAIN);
+    trigger_error("domain has no dyndns A-record for " . $subdomain, E_USER_ERROR);
+    respond("failed", "domain has no dyndns A-record for " . $subdomain);
 
   }
   $entries->item(0)->nodeValue = $ipaddr;
@@ -118,11 +131,11 @@ if (isset($ipaddr)) {
 /* New dynamic DNS IPv6 */
 if (isset($ip6addr)) {
   $xpath = new DOMXPath($doc_put);
-  $query = "//task/zone/rr[name='" . SUBDOMAIN . "' and type='AAAA']/value";
+  $query = "//task/zone/rr[name='" . $subdomain . "' and type='AAAA']/value";
   $entries = $xpath->query($query);
   if ($entries->length != 1) {
-    trigger_error("domain has no dyndns AAAA-record for " . SUBDOMAIN, E_USER_ERROR);
-    respond("failed", "domain has no dyndns AAAA-record for " . SUBDOMAIN);
+    trigger_error("domain has no dyndns AAAA-record for " . $subdomain, E_USER_ERROR);
+    respond("failed", "domain has no dyndns AAAA-record for " . $subdomain);
 
   }
   $entries->item(0)->nodeValue = $ip6addr;

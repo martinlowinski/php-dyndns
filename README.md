@@ -43,5 +43,4 @@ Roadmap
 
 - Standardize API, e.g. like [Dyn.com](http://dyn.com/support/developers/api/perform-update/)
 - Security-Audit
-- Support multiple dynamic subdomains
 - Rolling log files
