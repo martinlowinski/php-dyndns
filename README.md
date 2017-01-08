@@ -9,7 +9,7 @@ Installation
 ### Prerequisites
 
 - Contract with Schlund-Technologies and access to the [XML-Gateway](http://www.schlundtech.com/services/xml-gateway/).
-- Webserver with PHP and php-curl.
+- Webserver with PHP and php-curl (optional, runs from CLI as well).
 
 ### Setup
 
@@ -17,7 +17,7 @@ Installation
 2. Upload the files to your webserver. The `update.php` script has to be accessible from the web, for example: `dyndns.example.com/update.php`. *HTTPS is highly recommended!*
 3. Copy `config.example.php` to `config.php` and adjust the settings.
 4. Create the logdir and give the webserver write-access to it.
-5. Set up a cron-job, fritz-box, router, ... to do a request every time the ip-address changes. The URL is `http://dyndns.example.com/update.php?pass=<password>&domain=home.example.com&ipaddr=<ipaddr>&ip6addr=<ip6addr>`
+5. Set up a cron-job, fritz-box, router, ... to do a request every time the ip-address changes. The URL is `http://dyndns.example.com/update.php?pass=<password>&domain=example.com&ipaddr=<ipaddr>&ip6addr=<ip6addr>`
 
 ### NGINX configuration
 
@@ -36,6 +36,14 @@ server {
   location ~ ^/request-put.xml  { deny all; }
   location ~ ^/logs/  { deny all; }
 }
+```
+
+### Command line
+
+The script can also be executed from the command line:
+
+```
+php update.php --pass="<password>" --domain="example.com" --ipaddr="<ipaddr>" --ip6addr="<ip6addr>"
 ```
 
 Roadmap
