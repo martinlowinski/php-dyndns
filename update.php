@@ -14,12 +14,12 @@ set_error_handler("dyndns_error_handler");
 if (php_sapi_name() == "cli") {
   // Command line
   $shortopts = "";
-  $longopts = array("password::", "domain::", "ipv4::", "ipv6::");
+  $longopts = array("pass:", "domain:", "ipaddr:", "ip6addr:");
   $options = getopt($shortopts, $longopts);
-  $pass = isset($options['password']) ? $options['password'] : null;
+  $pass = isset($options['pass']) ? $options['pass'] : null;
   $domain = isset($options['domain']) ? $options['domain'] : null;
-  $ipaddr = isset($options['ipv4']) ? $options['ipv4'] : null;
-  $ip6addr = isset($options['ipv6']) ? $options['ipv6'] : null;
+  $ipaddr = isset($options['ipaddr']) ? $options['ipaddr'] : null;
+  $ip6addr = isset($options['ip6addr']) ? $options['ip6addr'] : null;
 } else {
   // HTTP
   $pass = isset($_GET['pass']) ? $_GET['pass'] : null;
