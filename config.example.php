@@ -18,7 +18,7 @@ define('XML_PUT_ZONE', 'request-put.xml');
 define('DOMAIN', 'example.com');
 define('SUBDOMAIN', 'home');
 // Multi-domain, e.g. home.example.com and base.example.org
-//define('DOMAINS', serialize(array("example.com" => "home", "example.org" => "base")));
+//define('DOMAINS', serialize(array("example.com" => array("home", "base"))));
 // Nameserver (for single- or multi-domain)
 define('SYSTEM_NS', 'ns.example.com');
 
